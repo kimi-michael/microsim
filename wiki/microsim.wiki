@@ -1,4 +1,4 @@
-#summary defines microsim is
+#summary defines what microsim is
 
 = Introduction =
 
