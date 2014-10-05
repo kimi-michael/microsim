@@ -1,0 +1,12 @@
+digraph G {
+	node [label="\N"];
+	graph [bb="0,0,186,268"];
+	"Node A" [style=filled, fillcolor=red, pos="85,250", width="0.97", height="0.50"];
+	"Node B" [style=filled, fillcolor=green, shape=record, pos="38,176", rects="8,158,69,194", width="0.83", height="0.50"];
+	"Node C" [style=filled, fillcolor="#0000ff", pos="35,92", width="0.97", height="0.50"];
+	"Node D" [style=filled, fillcolor="#976856", pos="76,18", width="0.97", height="0.50"];
+	"Node A" -> "Node B" [pos="e,49,194 74,233 69,224 61,213 55,203"];
+	"Node B" -> "Node C" [pos="e,35,110 37,158 36,147 36,133 36,120"];
+	"Node C" -> "Node D" [pos="e,66,36 45,74 49,66 56,55 61,45"];
+	"Node D" -> "Node A" [color=blue, labelfontcolor="#009933", fontsize="10.0", label="and back we go again", pos="e,84,232 77,36 77,47 78,61 79,74 81,126 83,187 84,222", lp="123,134"];
+}

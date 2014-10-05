@@ -1,0 +1,23 @@
+digraph G {
+        graph [rankdir = LR];
+
+        trk[shape=record, label="{ {<lookup>lookup | <dealloc>dealloc}| trk |{<miss>miss | <genHits>genHits | <update>update} }"];
+        tlb[shape=record, label="{ {<lookup>lookup | <update>update}| tlb |{<hit>hit | <miss>miss} }"];
+        mrg[shape=record, label="{ {<i1>i1 | <i0>i0}| mrg |{<o>o} }"];
+        lookup[shape=house, orientation=270, label="lookup"];
+        update[shape=house, orientation=270, label="update"];
+        miss[shape=house, orientation=90, label="miss"];
+        hit[shape=house, orientation=90, label="hit"];
+
+        trk:miss -> miss;
+        trk:genHits -> mrg:i1;
+        trk:update -> tlb:update;
+        tlb:hit -> mrg:i0;
+        tlb:miss -> trk:lookup;
+        mrg:o -> hit;
+        lookup -> tlb:lookup;
+        update -> trk:dealloc;
+
+	{ rank=same; lookup update }
+	{ rank=same; miss hit }	
+}

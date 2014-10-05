@@ -1,0 +1,16 @@
+digraph G {
+        graph [rankdir = LR];
+
+        notOutPrb[shape=record, orientation=180, label=" {<i>i}| notOutPrb"];
+        not1[shape=record, orientation=90, label=" {<i>i}| not1 |{<o>o} "];
+        andOutPrb[shape=record, orientation=90, label=" {<i>i}| andOutPrb"];
+        pi0[shape=record, orientation=90, label="pi0 |{<o>o} "];
+        pi1[shape=record, orientation=90, label="pi1 |{<o>o} "];
+        and1[shape=record, orientation=90, label=" {<i1>i1 | <i0>i0}| and1 |{<o>o} "];
+
+        not1:o -> notOutPrb:i;
+        pi0:o -> and1:i0;
+        pi1:o -> and1:i1;
+        and1:o -> andOutPrb:i;
+        and1:o -> not1:i;
+}
