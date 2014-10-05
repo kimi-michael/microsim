@@ -1,0 +1,53 @@
+This file describe uSim project. uSim is an event driven simulator.
+
+when working with using following env variables should be set:
+USIM_ROOT - full path to uSim simulator directory (where this file is located)
+PYTHONPATH - all search paths where uSim will be looking for designs to be
+             simulated
+
+Before start working:
+please set USIM_ROOT env var* and then source source_me.csh to set up remain 
+search paths
+
+*for example: 
+> modpath -n 1 -v USIM_ROOT `pwd`
+
+uSim can be run in two ways:
+a. command line interface:
+    uSim executable called microSim.py, to see help use:
+    > microSim --help
+    
+    there are some test examples in $USIM_ROOT/tests dir which you can run
+    
+    1. ring oscillator
+    To run ring oscillator for 10 ticks use the following command:
+    > microSim.py --module ring_osc --top top --test main --resolveZeroTime -u 10
+    
+    2. a ports example:
+    To run a-port ALU model example use this command:
+    > microSim.py --module aports_example --top dut --test main --resolveZeroTime -f
+
+b. GUI:
+    uSim's GUI may be used to run uSim as well. To run the GUI use:
+    > $USIM_ROOT/gui/micro_sim_gui.py &
+    this will open uSim's GUI. There you can choose 
+    1. search paths where uSim will search to locate the simulated module (--module argument)
+        by default all paths from PYTHONPATH are visible
+    2. models to be simulated
+
+    Then type top unit name and test name within the loaded module
+    Eventually choose how long you wanna run your model (for example: forever, 5 steps or unit tick 20)
+    Then click run
+
+    After that you may see on the left side a 'schematic' of loaded design
+    all prints will happen in source shell (where from the GUI was invoked)
+
+Source Code Browser:
+use following command to browse uSim's source code:
+> firefox $USIM_ROOT/docs/index.html &
+
+for any issue contact the author.
+
+
+
+author: kimi.michael@gmail.com

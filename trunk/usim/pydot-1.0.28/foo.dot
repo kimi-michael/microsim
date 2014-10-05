@@ -1,0 +1,7 @@
+digraph G {
+	node [label="\N", shape=record];
+	graph [bb="0,0,112,108"];
+	node0 [label="<f0> |<f1> G|<f2> ", pos="78,90", rects="44,72,65,108 65,72,92,108 92,72,113,108", width="0.94", height="0.50"];
+	node1 [label="<f0> |<f1> F|<f2> ", pos="33,18", rects="0,0,21,36 21,0,45,36 45,0,66,36", width="0.92", height="0.50"];
+	node0:f0 -> node1:f2 [pos="e,55,36 55,72 55,64 55,55 55,46"];
+}

@@ -1,0 +1,36 @@
+digraph G {
+        graph [rankdir = LR, splines=ortho];
+
+        trk[shape=record, label="{ {<lookup>lookup | <dealloc>dealloc}| trk |{<miss>miss | <genHits>genHits | <update>update} }"];
+        lookupProbe[shape=record, label="{ {<i>i}| lookupProbe}"];
+        updateTlbProbe[shape=record, label="{ {<i>i}| updateTlbProbe}"];
+        genHitProbe[shape=record, label="{ {<i>i}| genHitProbe}"];
+        missProbe[shape=record, label="{ {<i>i}| missProbe}"];
+        tlb[shape=record, label="{ {<lookup>lookup | <update>update}| tlb |{<hit>hit | <miss>miss} }"];
+        hitProbe[shape=record, label="{ {<i>i}| hitProbe}"];
+        tlbMissProbe[shape=record, label="{ {<i>i}| tlbMissProbe}"];
+        tlbHitProbe[shape=record, label="{ {<i>i}| tlbHitProbe}"];
+        mrg[shape=record, label="{ {<i1>i1 | <i0>i0}| mrg |{<o>o} }"];
+        updateProbe[shape=record, label="{ {<i>i}| updateProbe}"];
+        lookup[shape=house, orientation=270, label="lookup", pos="0,0!"];
+        update[shape=house, orientation=270, label="update", pos="0,500!"];
+        miss[shape=house, orientation=90, label="miss", pos="500,0!"];
+        hit[shape=house, orientation=90, label="hit", pos="500,500!"];
+
+        trk:miss -> missProbe:i;
+        trk:miss -> miss;
+        trk:genHits -> genHitProbe:i;
+        trk:genHits -> mrg:i1;
+        trk:update -> tlb:update;
+        trk:update -> updateTlbProbe:i;
+        tlb:hit -> tlbHitProbe:i;
+        tlb:hit -> mrg:i0;
+        tlb:miss -> tlbMissProbe:i;
+        tlb:miss -> trk:lookup;
+        mrg:o -> hitProbe:i;
+        mrg:o -> hit;
+        lookup -> tlb:lookup;
+        lookup -> lookupProbe:i;
+        update -> trk:dealloc;
+        update -> updateProbe:i;
+}

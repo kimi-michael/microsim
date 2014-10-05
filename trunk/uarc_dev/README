@@ -1,0 +1,27 @@
+this dir holds source file of vtd u-arch (wip)
+
+These source files could be run on top of uSim simulator.
+Thus $USIM_ROOT env variable must be set and
+> source $USIM_ROOT/source_me.csh
+must be run. A $DUT_ROOT variable should be set to point to 
+directory where this README file is located. 
+
+Just run following command in parent's dir
+> source source_me.csh 
+
+1. command line invocation:
+    To run some test one do the following:
+
+    1. run test bench of merge unit:
+    > microSim.py --module tb_merge --top dut --test main -f
+
+    2. run test bench of translation engine 
+    > microSim.py --module tb_translation_engine --top dut --test main -f
+
+    3. To run unittest of translation engine (without uSim)
+    > $DUT_ROOT/tests/tb_translation_engine_functional.py 
+    
+2. GUI invocation:
+    read $USIM_ROOT/README file to see how to run it in gui
+
+author: michael.kimyagarov@intel.com

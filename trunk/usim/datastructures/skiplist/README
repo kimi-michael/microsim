@@ -1,0 +1,12 @@
+Efficient Running Median using an Indexable Skiplist (Python recipe) by Raymond Hettinger
+ActiveState Code (http://code.activestate.com/recipes/576930/): 
+http://code.activestate.com/recipes/576930/
+
+
+A quick-n-dirty skiplist and a sortedlist implemented in python.
+https://github.com/mpchoy/python-skiplist
+
+python sweetness:
+Fast PyPy-compatible ordered map in 89 lines of Python
+http://pythonsweetness.tumblr.com/post/45227295342/fast-pypy-compatible-ordered-map-in-89-lines-of-python
+

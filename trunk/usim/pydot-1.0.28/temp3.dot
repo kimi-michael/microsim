@@ -1,0 +1,33 @@
+digraph G {
+	graph [splines=ortho, rankdir=LR, bb="0,0,494,150"];
+	node [label="\N"];
+	graph [bb="0,0,33227,9284"];
+	{
+		graph [bb="",
+			rank=same];
+		trk [label="{ {<lookup>lookup | <dealloc>dealloc}| trk |{<miss>miss | <genHits>genHits | <update>update} }", shape=record, pos="13896,7560", rects="13818,7572,13896,7596 13896,7572,13975,7596 13818,7548,13975,7572 13818,7524,13860,7548 13860,7524,13920,7548 13920,7524,13975,7\
+548", width="2.17", height="1.00"];
+		tlb [label="{ {<lookup>lookup | <update>update}| tlb |{<hit>hit | <miss>miss} }", shape=record, pos="13896,1728", rects="13831,1740,13896,1764 13896,1740,13961,1764 13831,1716,13961,1740 13831,1692,13891,1716 13891,1692,13961,1716", width="1.81", height="1.00"];
+	}
+	{
+		graph [bb="",
+			rank=same];
+		lookup [label=lookup, shape=house, pos="2952,2376", width="1.14", height="0.58", orientation=270];
+		update [label=update, shape=house, pos="2952,6696", width="1.11", height="0.58", orientation=270];
+	}
+	{
+		graph [bb="",
+			rank=same];
+		miss [label=miss, shape=house, pos="33264,9288", width="0.89", height="0.58", orientation=90];
+		hit [label=hit, shape=house, pos="33264,4248", width="0.75", height="0.58", orientation=90];
+	}
+	mrg [label="{ {<i1>i1 | <i0>i0}| mrg |{<o>o} }", shape=record, pos="25128,4248", rects="25083,4260,25128,4284 25128,4260,25173,4284 25083,4236,25173,4260 25083,4212,25173,4236", width="1.25", height="1.00"];
+	trk:miss -> miss [pos="e,33235,9285 13860,7538 14556,7602 32276,9199 33225,9284"];
+	trk:genHits -> mrg:i1 [pos="e,25083,4279 13920,7527 14539,7347 24430,4469 25073,4282"];
+	trk:update -> tlb:update [pos="e,13928,1764 13947,7524 13946,7241 13929,2154 13928,1774"];
+	tlb:hit -> mrg:i0 [pos="e,25128,4267 13891,1711 14513,1852 24479,4119 25118,4265"];
+	tlb:miss -> trk:lookup [pos="e,13857,7572 13926,1716 13922,1999 13862,7178 13857,7562"];
+	mrg:o -> hit [pos="e,33237,4248 25173,4224 25797,4226 32661,4246 33227,4248"];
+	lookup -> tlb:lookup [pos="e,13831,1754 2990,2374 3666,2335 13099,1795 13821,1755"];
+	update -> trk:dealloc [pos="e,13896,7581 2988,6699 3649,6753 13118,7518 13886,7580"];
+}
