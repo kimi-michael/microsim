@@ -1,0 +1,18 @@
+In this dir there are 2 sub-dirs:
+
+usim         - holds uSim simulator source files and some tests. 
+
+uarc_dev     - holds all files related to development of some micro arch' 
+             These files could be run on top of uSim simulator.
+
+both directories are standalone GIT repos
+
+In order to be able to run uSim on top of uarc_dev files do the 
+following source:
+> source ./source_me.csh
+It will setup all env variables and run source_me scripts of both projects.
+
+Then proceed reading ./usim/README and uarc_dev/README files on how to 
+get things done...
+
+author: kimi.michael@gmail.com
