@@ -24,14 +24,31 @@ uSim (pronounced: “micro sim”) is a hi-level general purpose simulator that 
 
 Black boxes, Ports and Connectors all are simulatable objects. They have an event handler function pointer that is called each time there’s event on a given object for current simulation time.
 
+*Example:*
+
+Let’s take an example of CAM (content addressable memory) one may think of it as some sort of hash table.
+CAM with `N` elements of type `T` will usually have the following interface:
+ # `hit_index_vector[N] lookup(T data);`
+   `hit_index_vector[i] == True` only if data equals `CAM_DATA_ARRAY[i]`, for `i` from `0` to `N-1`. i.e. `hit_index_vector` tells us which entries in `CAM_DATA_ARRAY` are holding the given data.
+ # `void update(int index, T data);`
+   Write the data into `CAM_DATA_ARRAY[index]`
+
+http://microsim.googlecode.com/svn/trunk/docs/pics/cam-example.jpg
+
+When there is an incoming event time=t,,0,, on lookup port handle_lookup function will be called. It will search the `CAM_DATA_ARRAY` for a given data and construct the hit vector signal. Then it will schedule an event on `hit_index_vector` port (with the constructed hit vector as a state) for time t,,0,, + t,,lookup,,. When t,,lookup,, is the time takes to CAM to perform a lookup that affects system’s performance.
+
 = uSim structure: =
 ==uSim consist of the following parts:==
+
+http://microsim.googlecode.com/svn/trunk/docs/pics/structure.png
 
 ===1. An arbitrary simulated model===
    It’s written by the developer/architect and usually include a test bench that is driving model’s inputs and monitor its outputs.
 
 ===2. Event Queue (EQ) ===
-   EQ stores all events that aren’t dispatched yet, sorted by dispatch time. Event with the smallest time value will be located at the top of the queue. EQ is further internally divided into time frames (frames). A frame is holding all events scheduled for the same simulation time. There are two event pools in each frame ‘now’, ‘later’.  Fetched events from a frame are always pulled from the ‘now’ queue. When ‘now’ queue is empty, we swap ‘now’ and ‘later’ queues and continue to drain ‘now’ queue. When both queues are empty the frame is released and the next frame become active. At this point simulator’s time is (implicitly) advanced (from tj to tj+1). Events may arrive in arbitrary order, they are inserted into appropriate frames into ‘now’ or ‘later’ queues according to event’s type. Using ‘now’ and ‘later’ queues developer can implement “non-blocking-assignment” (<=) behavior or postpone the evaluation of some output port until all inputs are valid (has arrived).
+   EQ stores all events that aren't dispatched yet, sorted by dispatch time. Event with the smallest time value will be located at the top of the queue. EQ is further internally divided into time frames (frames). A frame is holding all events scheduled for the same simulation time. There are two event pools in each frame ‘now’, ‘later’.  Fetched events from a frame are always pulled from the ‘now’ queue. When ‘now’ queue is empty, we swap ‘now’ and ‘later’ queues and continue to drain ‘now’ queue. When both queues are empty the frame is released and the next frame become active. At this point simulator’s time is (implicitly) advanced (from t,,j,, to t,,j+1,,). Events may arrive in arbitrary order, they are inserted into appropriate frames into ‘now’ or ‘later’ queues according to event’s type. Using ‘now’ and ‘later’ queues developer can implement “non-blocking-assignment” (`<=`) behavior or postpone the evaluation of some output port until all inputs are valid (has arrived).
+
+http://microsim.googlecode.com/svn/trunk/docs/pics/event-queue.png
 
 The event queue is implemented using skip-list, which is a probabilistic data structure implemented by multi-level linked list. Skip list shows good performance as event queue data structure in simulators, cause fetch of topmost element is done at O(1) complexity. While search, insertion and deletion of an event has O(log(n)) complexity. When n is the number of elements in the list.
 
@@ -48,14 +65,51 @@ while event_queue not empty:
    It is vital for a simulator to be able to run the simulation fast when model become big (more detailed) e.g. simulating a real workloads that last seconds in simulated clock domain. uSim was designed to enable “opportunistic parallelism” [1] acceleration approach straight forward. The approach’s main assumption is: in large models there are enough independent tasks that can be executed in parallel, to keep models consistency it’s necessary to check for dependencies only when model’s state is changed (at a commit stage). If a dependency was discover (non-common case) one of the tasks should be recomputed based on the outcome of the other task. This approach resembles out of order execution of instructions in modern CPUs when instruction’s commit happens in-order manner to keep consistency.
 
 =Results:=
-==a. A basic ring oscillator example (hello world equivalent):==
+== A. Basic ring oscillator example (hello world equivalent):==
 Ring oscillator consist of odd number of inverters (not logic gate) connected in a loop. It’s easy to see that this loop will start oscillating forever.
 
 The code of describing ring oscillator is:
-[image here:]
+{{{
+#!/bin/env python2.7
+# author: Michael Kimi
+# date  : Mon Sep  2 14:10:27 2013
+
+"""a ring oscillator module to present a gate level simulation 
+capabilities of microSim"""
+
+from model.connector  import Connector
+from model.unit       import Unit
+from model.primitives import Not, And, Probe
+
+
+def buildDesign():
+    """build ring oscillator"""
+    #create all units
+    top = Unit("top", None)
+    n1  = Not("not1", top)
+    n2  = Not("not2", top)
+    n3  = Not("not3", top)
+    
+    #connect all units to form a ring
+    c1 = Connector("c1", top, False, n1.ports["o"], n2.ports["i"])
+    c2 = Connector("c2", top, False, n2.ports["o"], n3.ports["i"])
+    c2 = Connector("c3", top, True,  n3.ports["o"], n1.ports["i"])   # enable print state changes 
+
+    #return created unit
+    return top
+
+
+def main(simControl):
+    #do nothing here cause ring osc' should start oscillating by itself
+    return
+
+######################################################################
+top = buildDesign()
+
+}}}
 
 uSim GUI:
-[image here:]
+http://microsim.googlecode.com/svn/trunk/docs/pics/ring-osc-gui.png
 
 In uSim’s GUI a picture of ring oscillator appear on the right side, each output port (o) of an inverter connected to input port (i) of next one. We set the simulation to run 20 ticks. The output:
 
@@ -69,15 +123,15 @@ Arguments: ['microSim']
 ## Importing Design 
 #################################################################################################################
 Info: python search path $PYTHONPATH:
-        /nfs/iil/proj/mpg/mkimyaga_wa/tools/pydot-1.0.28
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/uarc_dev/tests
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/uarc_dev/bitarray_0_8_1
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/uarc_dev
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/usim/tests
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/usim
+        /<some_full_path>/tools/pydot-1.0.28
+        /<some_full_path>/projects/uarc_dev/tests
+        /<some_full_path>/projects/uarc_dev/bitarray_0_8_1
+        /<some_full_path>/projects/uarc_dev
+        /<some_full_path>/projects/usim/tests
+        /<some_full_path>/projects/usim
 Info: importing [ring_osc] module
-Info: [top] found in [<module 'ring_osc' from '/nfs/iil/proj/mpg/mkimyaga_wa/projects/usim/tests/ring_osc.py'>] module
-Info: [main] found in [<module 'ring_osc' from '/nfs/iil/proj/mpg/mkimyaga_wa/projects/usim/tests/ring_osc.py'>] module
+Info: [top] found in [<module 'ring_osc' from '/<some_full_path>/projects/usim/tests/ring_osc.py'>] module
+Info: [main] found in [<module 'ring_osc' from '/<some_full_path>/projects/usim/tests/ring_osc.py'>] module
 ##################################################################################################################
 ## Loaded Design 
 ##################################################################################################################
@@ -119,14 +173,14 @@ Info: invoke design test function
 Info: Done
 }}}
 
-==b.A real example “Translation engine module”:==
+== B. Real example “Translation engine module”:==
 Translation engine is commonly used element in the developed some micro-arch. It caches commonly used addresses and their translation. It has two methods: 
 ===1. Lookup(address) ===
 Lookup return translated address if there is one in a cache. Otherwise it will generate a MISS to be fetched from the memory. If there is already one outstanding MISS for the same address this request will be blocked and nothing will be sent. 
 ===2. Update(lookup_address, translated_address, idx) ===
 When the outstanding request returns its translated address will be cashed. Then all waiting transactions for same address will be unblock by generating HIT for each of them. Following diagram present the translation engine module.
 
-[image here:]
+http://microsim.googlecode.com/svn/trunk/docs/pics/translation-engine-gui.png
 
 A simple test that sends lookup request on a cold cache and expects a miss presented below:
 
@@ -138,15 +192,15 @@ Arguments: ['microSim']
 ## Importing Design 
 #################################################################################################################
 Info: python search path $PYTHONPATH:
-        /nfs/iil/proj/mpg/mkimyaga_wa/tools/pydot-1.0.28
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/uarc_dev/tests
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/uarc_dev/bitarray_0_8_1
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/uarc_dev
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/usim/tests
-        /nfs/iil/proj/mpg/mkimyaga_wa/projects/usim
+        /<some_full_path>/tools/pydot-1.0.28
+        /<some_full_path>/projects/uarc_dev/tests
+        /<some_full_path>/projects/uarc_dev/bitarray_0_8_1
+        /<some_full_path>/projects/uarc_dev
+        /<some_full_path>/projects/usim/tests
+        /<some_full_path>/projects/usim
 Info: importing [tb_translation_engine] module
-Info: [dut] found in [<module 'tb_translation_engine' from '/nfs/iil/proj/mpg/mkimyaga_wa/projects/uarc_dev/tests/tb_translation_engine.pyc'>] module
-Info: [main] found in [<module 'tb_translation_engine' from '/nfs/iil/proj/mpg/mkimyaga_wa/projects/uarc_dev/tests/tb_translation_engine.pyc'>] module
+Info: [dut] found in [<module 'tb_translation_engine' from '/<some_full_path>/projects/uarc_dev/tests/tb_translation_engine.pyc'>] module
+Info: [main] found in [<module 'tb_translation_engine' from '/<some_full_path>/projects/uarc_dev/tests/tb_translation_engine.pyc'>] module
 #################################################################################################################
 ## Loaded Design
 #################################################################################################################
@@ -191,7 +245,12 @@ Info: Done
 }}}
 
 Additional important result is when the developer writes the model in a certain way (not explained in this doc) he can run the model in 2 ways. 
-1.Using uSim simulator to get cycle accurate simulation 
-2.Run the code in a traditional way directly on CPU (w/o the simulator). In that case functional equivalent of model will be executed.
+ # Using uSim simulator to get cycle accurate simulation 
+ # Run the code in a traditional way directly on CPU (w/o the simulator). In that case functional equivalent of model will be executed.
 
 To motivate this method I would like to describe, as an example, development flow of HW accelerator for image compression algorithm. Initially programmer develop the codec algorithm in pure software (modelSW) until he obtains desired result. Usually there are multiple ways to map this algorithm to hardware, hence performance accurate model is written (modelPEF). However both models (modelSW and modelPEF) implement the same algorithm and hence they may share the same code. Eventually if you have modelSW you can get modelPEF with less effort than writing it from scratch.
+
+
+
+---------
+author: Michael Kimi
